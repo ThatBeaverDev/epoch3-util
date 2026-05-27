@@ -1,7 +1,7 @@
-import { in_Message, in_sendPrivateMessage } from "../types/roturd_incoming";
+import { in_Message } from "../types/roturd_incoming";
 import {
 	out_ErrorPacket,
-	out_Message,
+	out_Packet,
 	out_PrivateMessagePacket,
 	out_SuccessPacket
 } from "../types/roturd_outgoing";
@@ -19,13 +19,13 @@ export default class RoturLibrary {
 	awaitingResponses: Record<
 		string,
 		{
-			promise: Promise<out_Message>;
-			resolve: (data: out_Message) => void;
+			promise: Promise<out_Packet>;
+			resolve: (data: out_Packet) => void;
 			reject: (reason?: any) => void;
 		}
 	> = {};
 
-	#msg<T extends out_Message>(message: in_Message): Promise<T> {
+	#msg<T extends out_Packet>(message: in_Message): Promise<T> {
 		const sock = this.#socketConnection;
 		if (!sock) return new Promise(() => {});
 
@@ -66,9 +66,11 @@ export default class RoturLibrary {
 		const socket = await this.env.sockets.connectToSocket(socketDirectory);
 		this.#socketConnection = socket;
 
-		socket.onMessage = async (msg: out_Message) => {
+		socket.onMessage = async (msg: out_Packet) => {
 			switch (msg.intent) {
 				case "success": {
+					if (!msg.responder) return;
+
 					const obj = this.awaitingResponses[msg.responder];
 					obj.resolve(msg);
 					break;
@@ -76,12 +78,14 @@ export default class RoturLibrary {
 
 				case "error": {
 					this.env.error(`${msg.responder}: ${msg.message}`);
+					if (!msg.responder) return;
 
 					const obj = this.awaitingResponses[msg.responder];
 					obj.reject(msg.message);
 					break;
 				}
 				case "privateMessage": {
+					console.warn(msg);
 					this.onMessage?.(msg);
 					break;
 				}
@@ -109,7 +113,7 @@ export default class RoturLibrary {
 
 	async listUsers() {
 		type UserListPacket = out_SuccessPacket<
-			{ username: string; rotur: string | null }[]
+			{ websocketName: string; roturName: string | null }[]
 		>;
 
 		return (
@@ -133,7 +137,10 @@ export default class RoturLibrary {
 
 	async getUser() {
 		const resp = await this.#msg<
-			| out_SuccessPacket<{ username: string; rotur: string | null }>
+			| out_SuccessPacket<{
+					websocketName: string;
+					roturName: string | null;
+			  }>
 			| out_ErrorPacket
 		>({
 			intent: "getUser"
@@ -148,23 +155,22 @@ export default class RoturLibrary {
 		targetUser: string,
 		localPort: string,
 		remotePort: string,
-		payload: string
+		payload: any
 	) {
-		const msg: in_sendPrivateMessage = {
+		const outcome = await this.#msg({
 			intent: "sendPrivateMessage",
 			outgoingPort: localPort,
-			payload: payload,
+			payload,
 			targetPort: remotePort,
 			targetSocketUser: targetUser
-		};
+		});
 
-		const outcome = await this.#msg<out_SuccessPacket | out_ErrorPacket>(
-			msg
-		);
-
-		if (outcome.intent == "error") throw new Error(outcome.message);
+		if (outcome.intent === "error") {
+			throw new Error(outcome.message);
+		}
 	}
 }
+
 export async function getRoturToken(env: Environment) {
 	await env.fs.mkdir("/data/rotur");
 	const tokenFile = "/data/rotur/token.json";
