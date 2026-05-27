@@ -72,7 +72,11 @@ export default class RoturLibrary {
 					if (!msg.responder) return;
 
 					const obj = this.awaitingResponses[msg.responder];
-					obj.resolve(msg);
+
+					if (obj) {
+						obj.resolve(msg);
+						delete this.awaitingResponses[msg.responder];
+					}
 					break;
 				}
 
@@ -81,7 +85,12 @@ export default class RoturLibrary {
 					if (!msg.responder) return;
 
 					const obj = this.awaitingResponses[msg.responder];
-					obj.reject(msg.message);
+
+					if (obj) {
+						obj.reject(msg.message);
+						delete this.awaitingResponses[msg.responder];
+					}
+
 					break;
 				}
 				case "privateMessage": {
