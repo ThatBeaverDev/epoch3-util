@@ -1,3 +1,3 @@
 # epoch3-util
 
-Utilities and libraries for programs for Constellation-epoch3.
+Utilities and libraries for programs pertaining to Constellation-epoch3.
