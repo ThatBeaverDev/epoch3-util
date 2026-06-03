@@ -98,6 +98,8 @@ export interface InputConfig_BoolOnPaste {
 export interface FileStats {
 	size: number;
 	type: "file" | "directory" | "socket";
+	modified: number;
+	created: number;
 }
 
 export type NetworkRequestType = "get" | "post";
