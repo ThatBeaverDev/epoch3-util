@@ -193,11 +193,19 @@ export async function getRoturToken(env: Environment) {
 		if (tokenJsonFile?.token) return tokenJsonFile?.token;
 	} catch (e) {}
 
-	const { code } = await env.network.request<{ code: string }>(
+	const linkCodeRequest = await env.network.request<{ code: string }>(
 		"get",
 		"https://api.rotur.dev/link/code",
 		"json"
 	);
+
+	if (!linkCodeRequest.isOk) {
+		throw new Error(
+			`Failed to get link code from rotur (HTTP error ${linkCodeRequest.statusCode}, ${linkCodeRequest.statusText})`
+		);
+	}
+
+	const { code } = linkCodeRequest.response;
 
 	env.print(
 		`Please open 'https://rotur.dev/link' and enter the code ${code}.`
@@ -209,11 +217,19 @@ export async function getRoturToken(env: Environment) {
 		| { linked: false; token: "" }
 		| { linked: true; token: string };
 
-	const auth = await env.network.request<LinkResponse>(
+	const authRequest = await env.network.request<LinkResponse>(
 		"get",
 		`https://api.rotur.dev/link/user?code=${code}`,
 		"json"
 	);
+
+	if (!authRequest.isOk) {
+		throw new Error(
+			`Authentication failed due to HTTP code ${authRequest.statusCode} (${authRequest.statusText})`
+		);
+	}
+
+	const auth = authRequest.response;
 
 	if (!auth.linked) {
 		throw new Error("Link not completed by user.");

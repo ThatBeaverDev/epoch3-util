@@ -119,6 +119,22 @@ type EventName = keyof EventMap;
 
 type EventCallback<K extends EventName> = (data: EventMap[K]) => any;
 
+export type NetworkDataResponse<T = any> =
+	| {
+			response: T;
+
+			isOk: true;
+			statusCode: number;
+			statusText: string;
+	  }
+	| {
+			errorResponse: string | T;
+
+			isOk: false;
+			statusCode: number;
+			statusText: string;
+	  };
+
 export interface Environment {
 	/**
 	 * Log an line to the console
@@ -135,6 +151,12 @@ export interface Environment {
 	 * @param data Error text
 	 */
 	error(data: Log): void;
+	getLiveCanvas(
+		width: number,
+		height: number
+	):
+		| Promise<OffscreenCanvasRenderingContext2D>
+		| OffscreenCanvasRenderingContext2D;
 
 	/**
 	 * Request text input from the user. Requires input access.
@@ -238,28 +260,28 @@ export interface Environment {
 			format?: "text",
 			body?: Object,
 			headers?: Record<string, string>
-		): Promise<string>;
+		): Promise<NetworkDataResponse<string>>;
 		request<T = Object>(
 			type: NetworkRequestType,
 			url: string,
 			format: "json",
 			body?: Object,
 			headers?: Record<string, string>
-		): Promise<T>;
+		): Promise<NetworkDataResponse<T>>;
 		request(
 			type: NetworkRequestType,
 			url: string,
 			format: "datauri",
 			body?: Object,
 			headers?: Record<string, string>
-		): Promise<string>;
+		): Promise<NetworkDataResponse<string>>;
 		request<T = Object>(
 			type: NetworkRequestType,
 			url: string,
 			format?: "text" | "json" | "datauri",
 			body?: Object,
 			headers?: Record<string, string>
-		): Promise<string | T>;
+		): Promise<NetworkDataResponse<string | T>>;
 	};
 
 	systemStats: {
