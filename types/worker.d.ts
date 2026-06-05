@@ -1,3 +1,5 @@
+import { WorkerEnv_Network_Get } from "../../types/workerMessages";
+
 type HexColour = string;
 type LogSegment =
 	| {
@@ -259,28 +261,32 @@ export interface Environment {
 			url: string,
 			format?: "text",
 			body?: Object,
-			headers?: Record<string, string>
+			headers?: Record<string, string>,
+			options?: WorkerEnv_Network_Get["options"]
 		): Promise<NetworkDataResponse<string>>;
 		request<T = Object>(
 			type: NetworkRequestType,
 			url: string,
 			format: "json",
 			body?: Object,
-			headers?: Record<string, string>
+			headers?: Record<string, string>,
+			options?: WorkerEnv_Network_Get["options"]
 		): Promise<NetworkDataResponse<T>>;
 		request(
 			type: NetworkRequestType,
 			url: string,
 			format: "datauri",
 			body?: Object,
-			headers?: Record<string, string>
+			headers?: Record<string, string>,
+			options?: WorkerEnv_Network_Get["options"]
 		): Promise<NetworkDataResponse<string>>;
 		request<T = Object>(
 			type: NetworkRequestType,
 			url: string,
 			format?: "text" | "json" | "datauri",
 			body?: Object,
-			headers?: Record<string, string>
+			headers?: Record<string, string>,
+			options?: WorkerEnv_Network_Get["options"]
 		): Promise<NetworkDataResponse<string | T>>;
 	};
 
