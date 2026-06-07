@@ -293,10 +293,6 @@ export interface Environment {
 	systemStats: {
 		uptime(): Promise<number>;
 
-		workerStats(): Promise<
-			{ id: number; processes: number; activeTime: number }[]
-		>;
-
 		kernelVersion(): Promise<number>;
 	};
 
