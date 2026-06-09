@@ -3,11 +3,16 @@ import { WorkerEnv_Network_Get } from "../../types/workerMessages";
 type HexColour = string;
 type LogSegment =
 	| {
+			// text
 			type?: "string";
 			text: string;
+
 			colour?: HexColour;
+			bold?: boolean;
+			italic?: boolean;
 	  }
 	| {
+			// URL image
 			type: "image";
 			url: string;
 
@@ -22,6 +27,7 @@ type LogSegment =
 			height?: number | "auto";
 	  }
 	| {
+			// file image
 			type: "image";
 			dir: string;
 
@@ -34,6 +40,21 @@ type LogSegment =
 			 * height in lines
 			 */
 			height?: number | "auto";
+	  }
+	| {
+			// live canvas
+			type: "liveCanvas";
+			id: number;
+
+			/**
+			 * width in lines
+			 */
+			width: number;
+
+			/**
+			 * height in lines
+			 */
+			height: number;
 	  };
 
 export type ArrayLog = LogSegment[];
@@ -113,6 +134,12 @@ interface EventDataTypes {
 		alt: boolean;
 		shift: boolean;
 	};
+	keyup: {
+		name: string;
+
+		alt: boolean;
+		shift: boolean;
+	};
 }
 
 type EventMap = EventDataTypes;
@@ -157,8 +184,8 @@ export interface Environment {
 		width: number,
 		height: number
 	):
-		| Promise<OffscreenCanvasRenderingContext2D>
-		| OffscreenCanvasRenderingContext2D;
+		| Promise<{ canvas: OffscreenCanvas; id: number }>
+		| { canvas: OffscreenCanvas; id: number };
 
 	/**
 	 * Request text input from the user. Requires input access.
@@ -408,6 +435,8 @@ export interface WorkerProgramStore {
 
 	socketConnections: { connection: SocketConnection; socketId: number }[];
 	socketServers: { server: SocketServer; socketId: number }[];
+
+	liveCanvasIds: number[];
 
 	onExit: (() => any)[];
 	exit?: boolean;
