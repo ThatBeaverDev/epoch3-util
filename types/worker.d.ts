@@ -320,6 +320,11 @@ export interface Environment {
 
 		clearInterval(id: number): void;
 	};
+
+	/**
+	 * Exits the process
+	 */
+	exit(): void;
 }
 
 export interface SocketServer<
@@ -405,6 +410,7 @@ export interface WorkerProgramStore {
 	socketServers: { server: SocketServer; socketId: number }[];
 
 	onExit: (() => any)[];
+	exit?: boolean;
 }
 
 interface onPasteData {
