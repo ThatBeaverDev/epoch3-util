@@ -370,13 +370,16 @@ export interface SocketServer<
 
 	exit(): void;
 }
-export interface SocketConnection {
+export interface SocketConnection<
+	OutgoingType extends Object = any,
+	IncomingType extends Object = any
+> {
 	directory: string;
 
-	onMessage?: (payload: any) => void;
+	onMessage?: (payload: IncomingType) => void;
 	onClose?: () => void;
 
-	sendMessage(payload: any): void;
+	sendMessage(payload: OutgoingType): void;
 
 	exit(): void;
 }
