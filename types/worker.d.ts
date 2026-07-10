@@ -166,6 +166,8 @@ export interface WorkerOutputProxy {
 		message: string,
 		config?: Runtime_Proxy_Input["config"]
 	) => string | Promise<string>;
+
+	onClear: () => void;
 }
 
 export interface Environment {
