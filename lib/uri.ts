@@ -41,3 +41,13 @@ export async function blobToDataURL(blob: Blob) {
 
 	return `data:${blob.type};base64,${btoa(binary)}`;
 }
+
+export function blobToUrl(blob: Blob) {
+	const url = URL.createObjectURL(blob);
+
+	setTimeout(() => {
+		URL.revokeObjectURL(url);
+	}, 5000);
+
+	return url;
+}
