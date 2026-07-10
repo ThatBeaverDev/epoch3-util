@@ -135,6 +135,7 @@ interface EventDataTypes {
 		alt: boolean;
 		shift: boolean;
 	};
+	resize: { width: number };
 }
 
 type EventMap = EventDataTypes;
@@ -214,6 +215,8 @@ export interface Environment {
 	 */
 	setLogs(logs?: Log[]): void;
 
+	terminalWidth(): Promise<number>;
+
 	/**
 	 * Access to the system's filesystem
 	 */
@@ -288,7 +291,7 @@ export interface Environment {
 		}
 	): Promise<{
 		onExit: Promise<{ return?: Log; logs: Log[] }>;
-		triggerProxyEvent<K extends "keydown" | "keyup">(
+		triggerProxyEvent<K extends "keydown" | "keyup" | "resize">(
 			name: K,
 			data: EventMap[K]
 		): void;
@@ -392,8 +395,7 @@ export interface SocketServer<
 	onClientDisconnect?: (client: { pid: number }) => any;
 
 	onMessage:
-		| undefined
-		| ((client: { pid: number }, payload: IncomingType) => any);
+		undefined | ((client: { pid: number }, payload: IncomingType) => any);
 	sendMessage(clientPid: number, payload: OutgoingType): void;
 
 	exit(): void;
