@@ -1,3 +1,7 @@
+import {
+	Runtime_Proxy_Input,
+	Runtime_Proxy_Log
+} from "../../types/runtimeMessages";
 import { WorkerEnv_Network_Get } from "../../types/workerMessages";
 
 type HexColour = string;
@@ -105,15 +109,6 @@ export interface KeyPressModifiers {
 export interface InputConfig {
 	hideTyping: boolean;
 	leaveInputOnCompletion: boolean;
-	onPaste: (data: onPasteData) => void;
-	inline: boolean;
-	initialText: string;
-}
-
-export interface InputConfig_BoolOnPaste {
-	hideTyping: boolean;
-	leaveInputOnCompletion: boolean;
-	onPasteFunctionPresent: boolean;
 	inline: boolean;
 	initialText: string;
 }
@@ -163,6 +158,15 @@ export type NetworkDataResponse<T = any> =
 			statusCode: number;
 			statusText: string;
 	  };
+
+export interface WorkerOutputProxy {
+	onLog: (type: Runtime_Proxy_Log["log"]["type"], log: Log) => any;
+
+	onInput: (
+		message: string,
+		config?: Runtime_Proxy_Input["config"]
+	) => string | Promise<string>;
+}
 
 export interface Environment {
 	/**
@@ -261,9 +265,25 @@ export interface Environment {
 		config?: {
 			handOverDisplay?: boolean;
 			input?: Log[];
+			outputProxy?: undefined;
 		}
 	): Promise<{
 		onExit: Promise<{ return?: Log; logs: Log[] }>;
+	}>;
+	execute(
+		path: string,
+		args?: string[],
+		config?: {
+			handOverDisplay?: boolean;
+			input?: Log[];
+			outputProxy: WorkerOutputProxy;
+		}
+	): Promise<{
+		onExit: Promise<{ return?: Log; logs: Log[] }>;
+		triggerProxyEvent<K extends "keydown" | "keyup">(
+			name: K,
+			data: EventMap[K]
+		): void;
 	}>;
 
 	/**
@@ -432,22 +452,17 @@ export interface WorkerProgramStore {
 	locked: boolean;
 	passValue?: any;
 
-	inputRequest?: {
-		onPaste?: (data: onPasteData) => any;
-	};
+	inputRequest?: {};
 
 	socketConnections: { connection: SocketConnection; socketId: number }[];
 	socketServers: { server: SocketServer; socketId: number }[];
 
 	liveCanvasIds: number[];
 
+	outputProxyHandlers: Partial<Record<number, WorkerOutputProxy>>;
+
 	onExit: (() => any)[];
 	exit?: boolean;
-}
-
-interface onPasteData {
-	type: "text" | "image" | "file";
-	data: string;
 }
 
 export type ConstellationProgram = (
