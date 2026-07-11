@@ -122,20 +122,19 @@ export interface FileStats {
 
 export type NetworkRequestType = "get" | "post";
 
+export interface KeyPressData {
+	name: string;
+
+	alt: boolean;
+	shift: boolean;
+	ctrl: boolean;
+	super: boolean;
+}
+
 interface EventDataTypes {
-	keydown: {
-		name: string;
-
-		alt: boolean;
-		shift: boolean;
-	};
-	keyup: {
-		name: string;
-
-		alt: boolean;
-		shift: boolean;
-	};
-	resize: { width: number };
+	keydown: KeyPressData;
+	keyup: KeyPressData;
+	resize: { width: number; height: number };
 }
 
 type EventMap = EventDataTypes;
@@ -169,6 +168,10 @@ export interface WorkerOutputProxy {
 	) => string | Promise<string>;
 
 	onSetLogs: (logs: Log[]) => void;
+
+	getDimensions: () =>
+		| Promise<{ width: number; height: number }>
+		| { width: number; height: number };
 }
 
 export interface Environment {
@@ -215,7 +218,7 @@ export interface Environment {
 	 */
 	setLogs(logs?: Log[]): void;
 
-	terminalWidth(): Promise<number>;
+	terminalDimensions(): Promise<{ width: number; height: number }>;
 
 	/**
 	 * Access to the system's filesystem
