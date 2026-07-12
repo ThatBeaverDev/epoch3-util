@@ -152,7 +152,7 @@ export type NetworkDataResponse<T = any> =
 			statusText: string;
 	  }
 	| {
-			errorResponse: string | T;
+			errorResponse?: string | T;
 
 			isOk: false;
 			statusCode: number;
@@ -354,7 +354,7 @@ export interface Environment {
 	systemStats: {
 		uptime(): Promise<number>;
 
-		kernelVersion(): Promise<number>;
+		kernelVersion(): Promise<string>;
 	};
 
 	sound: {
